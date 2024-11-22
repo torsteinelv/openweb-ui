@@ -18,7 +18,6 @@ import os
 import numpy as np
 from pydantic import BaseModel
 from langchain_ollama import OllamaEmbeddings, OllamaLLM
-from langchain.chains import RetrievalQA
 
 class Pipeline:
     class Valves(BaseModel):
@@ -32,7 +31,6 @@ class Pipeline:
         self.documents = []  # Store documents in memory
         self.embeddings = []  # Store embeddings in memory
         self.llm = None
-        self.qa_chain = None
         self.embedding_model = None
 
         # Initialize Valves with environment variables or fallback values
@@ -124,8 +122,7 @@ class Pipeline:
             context = "\n\n".join(relevant_docs)
 
             query = f"Context: {context}\n\nQuestion: {user_message}\n\nAnswer:"
-            response = self.llm.call({"query": query})
-            yield response.get("result", "No result found.")
+            response = self.llm(query)
+            yield response
         except Exception as e:
             yield f"An error occurred: {e}"
-
