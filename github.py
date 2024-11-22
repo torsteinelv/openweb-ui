@@ -10,6 +10,7 @@ requirements:
   - PyGithub
   - numpy
   - langchain-community
+  - pydantic
 """
 
 from typing import List, Union, Generator, Iterator
