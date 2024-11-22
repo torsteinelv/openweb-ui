@@ -2,7 +2,7 @@
 title: GitHub Analysis Pipeline with Ollama
 author: torsteinelv
 date: 2024-11-21
-version: 1.5
+version: 1.9
 license: MIT
 description: A pipeline for analyzing a GitHub repository using Ollama embeddings and a simple in-memory vector store.
 requirements:
@@ -109,7 +109,20 @@ class Pipeline:
             for idx, doc_embedding in enumerate(self.embeddings)
         ]
         similarities = sorted(similarities, key=lambda x: x[0], reverse=True)
-        return [self.documents[idx]["content"] for _, idx in similarities[:top_k]]
+        return [
+            {
+                "file_path": self.documents[idx]["file_path"],
+                "content": self.documents[idx]["content"]  # Return the full content of the file
+            }
+            for _, idx in similarities[:top_k]
+        ]
+
+    def find_files_containing(self, text: str) -> List[str]:
+        """Find all files containing the specified text."""
+        matching_files = [
+            doc["file_path"] for doc in self.documents if text in doc["content"]
+        ]
+        return matching_files
 
     def pipe(
         self, user_message: str, model_id: str, messages: List[dict], body: dict
@@ -120,7 +133,9 @@ class Pipeline:
         print(f"User Message: {user_message}")
         try:
             relevant_docs = self.search_similar(user_message, top_k=3)
-            context = "\n\n".join(relevant_docs)
+            context = "\n\n".join(
+                [f"File: {doc['file_path']}\nContent:\n```\n{doc['content']}\n```" for doc in relevant_docs]
+            )
 
             query = f"Context: {context}\n\nQuestion: {user_message}\n\nAnswer:"
             response = self.llm(query)
