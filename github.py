@@ -1,5 +1,5 @@
 """
-title: Github Analysis Pipeline with Ollama
+title: GitHub Analysis Pipeline with Ollama
 author: torsteinelv
 date: 2024-11-21
 version: 1.5
